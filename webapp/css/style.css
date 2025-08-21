@@ -1,0 +1,125 @@
+/*.whiteHeader h1 span {
+    color: #ffffff;
+}
+
+.whiteHeader.sapMOH {
+    padding: 1rem;
+}
+
+.noPadding {
+    padding: 0 !important;
+}
+
+.noPadding.sapUiRespGrid.sapUiRespGridHSpace1>div {
+    margin: 0 1rem 1rem 0;
+}
+
+.tilePanel {
+    box-shadow: 0 0 0 0.0625rem rgba(0, 0, 0, 0.1), 0 0.125rem 0.5rem 0 rgba(0, 0, 0, 0.1);
+}
+
+.stylizedAccentNone.sapMObjStatusInverted.sapMObjStatusNone .sapMObjStatusText,
+.stylizedAccentNone.sapMObjStatusInverted.sapMObjStatusNone .sapMObjStatusIcon {
+    background-color: #647987;
+}
+
+.stylizedAccentInformation.sapMObjStatusInverted.sapMObjStatusInformation .sapMObjStatusText,
+.stylizedAccentInformation.sapMObjStatusInverted.sapMObjStatusInformation .sapMObjStatusIcon {
+    background-color: #0f828f;
+}
+
+.textTopAlign {
+    vertical-align: top;
+}
+
+.clickableExtPanel:hover {
+	cursor: pointer;
+}
+
+.clickableExtPanel:hover .sapUiIcon.extHoverableIcon {
+	color: #0a6ed1;
+}
+
+@media (max-width: 400px) {
+    .sapMHBox.switchMediaDirection {
+        -webkit-flex-direction: column;
+        flex-direction: column;
+    }
+}
+
+.pseudoTextConnectionGroup .sapMGHLITitle::before {
+	content: 'Interface: ';
+}
+
+.pseudoTextTableNameGroup .sapMGHLITitle::before {
+	content: 'Table Name: ';
+}
+
+.sapUiSizeCompact .sapMColumnHeader {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.sapUiSizeCompact .sapMCb.sapMLIBSelectM .sapMCbBg {
+    left: 10px;
+}
+
+.nonSelectable .sapMCb.sapMLIBSelectM {
+    display: none;
+}
+
+.sapUiLayoutCSSGridBoxLayoutFlattenHeight ul .sapMLIB:not(.sapMGHLI), .sapUiDnDGridIndicator {
+    height: auto !important;
+}
+
+.mainGridList .sapMPanelContent:not(.sapMPanelBGTransparent) {
+    border-bottom: none;
+}
+
+.mainGridList .sapMPanelBGSolid {
+    background-color: transparent;
+}
+
+.customFilterBar {
+	margin: -1rem -2rem;
+}
+
+.customFilterBar .sapUiAFLayout>div.sapUiAFLayoutItem {
+    flex-basis: 16rem !important;
+    max-width: 16rem !important;
+}*/
+
+.clickableExtPanel:hover {
+	cursor: pointer;
+}
+
+.sapUiSizeCompact .sapMPanel.clickableExtPanel .sapMPanelHdr {
+    line-height: 3rem;
+    height: 3rem;
+}
+
+.customBadges {
+	height: 18px;
+}
+
+.customStatus {
+	padding-top: 10px;
+	/*margin-bottom: -10px;*/
+}
+
+.force100height>div.sapMScrollContScroll {
+    height: 100% !important;
+}
+
+.logoImg.sapFAvatarSquare,
+.logoImg.sapFAvatarSquare .sapFAvatarImageHolder {
+    border-radius: 0;
+}
+
+.whiteHeader .sapMOH {
+    padding: 0.6rem;
+}
+
+.sapUiTinyNegativeMarginTop {
+    margin-top: -0.5rem;
+}

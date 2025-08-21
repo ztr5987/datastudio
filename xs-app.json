@@ -1,0 +1,36 @@
+{
+  "welcomeFile": "/index.html",
+  "authenticationMethod": "route",
+  "routes": [ 
+    {
+      "source": "^/erd/(.*)$",
+      "target": "/$1",
+      "authenticationType": "xsuaa",
+      "destination": "ERD_PP"
+    },
+    {
+      "source": "^/s4d/(.*)$",
+      "target": "/$1",
+      "authenticationType": "xsuaa",
+      "destination": "S4D_PP"
+    },
+    {
+      "source": "^/resources/(.*)$",
+      "target": "/resources/$1",
+      "authenticationType": "none",
+      "destination": "ui5"
+    },
+    {
+      "source": "^/test-resources/(.*)$",
+      "target": "/test-resources/$1",
+      "authenticationType": "none",
+      "destination": "ui5"
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

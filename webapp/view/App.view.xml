@@ -1,0 +1,988 @@
+<mvc:View controllerName="asapio.datastudio.controller.App" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m"
+	xmlns:tnt="sap.tnt" xmlns:l="sap.ui.layout" xmlns:core="sap.ui.core" xmlns:f="sap.ui.layout.form" xmlns:gridf="sap.f" xmlns:uxap="sap.uxap"
+	xmlns:fb="sap.ui.comp.filterbar" xmlns:grid="sap.ui.layout.cssgrid" xmlns:uitab="sap.ui.table" xmlns:my="asapio.datastudio.controls">
+	<Shell id="shell" appWidthLimited="false">
+		<App id="app" class="sapUiSizeCompact">
+			<pages>
+				<tnt:ToolPage id="toolPage" sideExpanded="false">
+					<tnt:header>
+						<tnt:ToolHeader>
+							<Button id="sideNavigationToggleButton" icon="sap-icon://menu2" type="Transparent" press=".onSideNavButtonPress">
+								<layoutData>
+									<OverflowToolbarLayoutData priority="NeverOverflow"/>
+								</layoutData>
+							</Button>
+							<Avatar src="./image/logo.png" displayShape="Square" displaySize="XS" class="logoImg sapUiSmallMarginBegin" visible="{helperModel>/isLogoVisible}"/>
+							<ObjectHeader id="pageHeader" title="Data Studio" class="whiteHeader">
+								<layoutData>
+									<OverflowToolbarLayoutData priority="NeverOverflow"/>
+								</layoutData>
+							</ObjectHeader>
+							<ToolbarSpacer>
+								<layoutData>
+									<OverflowToolbarLayoutData priority="High"/>
+								</layoutData>
+							</ToolbarSpacer>
+							<Select id="availableModelsHeader" items="{helperModel>/availableConnections}" change="onConnectionChanged" forceSelection="false">
+								<core:Item key="{helperModel>key}" text="{helperModel>text}"/>
+							</Select>
+						</tnt:ToolHeader>
+					</tnt:header>
+					<tnt:sideContent>
+						<tnt:SideNavigation id="sideNav" expanded="true" itemSelect="onItemSelect">
+							<tnt:NavigationList items="{path: 'sideBar>/navigation'}">
+								<tnt:NavigationListItem text="{sideBar>title}" icon="{sideBar>icon}" key="{sideBar>key}" items="{sideBar>items}">
+									<tnt:NavigationListItem text="{sideBar>title}" icon="{sideBar>icon}" key="{sideBar>key}"></tnt:NavigationListItem>
+								</tnt:NavigationListItem>
+							</tnt:NavigationList>
+						</tnt:SideNavigation>
+					</tnt:sideContent>
+					<tnt:mainContents>
+						<NavContainer id="pageContainer" autoFocus="false" initialPage="default">
+							<pages>
+								<ScrollContainer id="default">
+								</ScrollContainer>
+								<ScrollContainer id="dataObj" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<fb:FilterBar id="filterbar" useToolbar="true" showGoOnFB="false" search=".onSearch" filterChange=".onFilterChange"
+										class="sapUiMediumMarginBottom sapUiSizeCompact customFilterBar">
+										<fb:filterGroupItems>
+											<fb:FilterGroupItem name="search" label="Search" groupName="Group1" visibleInFilterBar="true">
+												<fb:control>
+													<SearchField id="searchField" width="250px" search="onSearchMain" placeholder=""></SearchField>
+												</fb:control>
+											</fb:FilterGroupItem>
+											<fb:FilterGroupItem name="objectType" label="Standard Data Objects" groupName="Group1" visibleInFilterBar="true">
+												<fb:control>
+													<Switch id="objectTypeSwitch" state="true" change="onObjectTypeChange"/>
+												</fb:control>
+											</fb:FilterGroupItem>
+										</fb:filterGroupItems>
+									</fb:FilterBar>
+									<Breadcrumbs id="dataObjBC" currentLocationText="Standard Data Objects" separatorStyle="GreaterThan" visible="true"></Breadcrumbs>
+									<gridf:GridList id="dataObjContent" class="mainGridList" growing="true" growingThreshold="100">
+										<gridf:customLayout>
+											<grid:GridBoxLayout boxesPerRowConfig="XL3 L3 M2 S1"/>
+										</gridf:customLayout>
+										<gridf:GridListItem>
+											<my:PanelExtended id="dataObjContentTemplate" visible="true" backgroundDesign="Solid" headerText="{Description}" class="clickableExtPanel"
+												press="onPanelExtPress">
+												<my:content>
+													<VBox>
+														<items>
+															<!--<core:Icon src="sap-icon://inspect" class="extHoverableIcon"/>
+															<ObjectHeader title="{Description}" condensed="true" class="noPadding"/>-->
+															<HBox class="sapUiSmallMarginBottom switchMediaDirection customBadges">
+																<items>
+																	<ObjectStatus inverted="true" text="ECC" state="None" class="sapUiTinyMarginEnd stylizedAccentNone" visible="{= ${isECC}}"/>
+																	<ObjectStatus inverted="true" text="S/4HANA" state="Information" class="stylizedAccentInformation" visible="{= ${isS4}}"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Data View name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CDSViewName}" press="handleCDSLinkPress"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Version:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{CatalogObjectVersion}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Payload:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CatalogObjectId}" press="handlePayloadPress"/>
+																</items>
+															</HBox>
+															<HBox justifyContent="SpaceBetween" class="switchMediaDirection customStatus">
+																<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${isActive} === true ? 'Active' : 'Inactive'}"
+																	state="{= ${isActive} === true ? 'Success' : 'Error'}">
+																	<layoutData>
+																		<FlexItemData alignSelf="End"/>
+																	</layoutData>
+																</ObjectStatus>
+															</HBox>
+														</items>
+													</VBox>
+												</my:content>
+												<my:layoutData>
+													<FlexItemData growFactor="1" shrinkFactor="0"/>
+												</my:layoutData>
+											</my:PanelExtended>
+										</gridf:GridListItem>
+									</gridf:GridList>
+									<!--<l:Grid id="dataObjContent" containerQuery="true" defaultSpan="XL4 L4 M6 S12" content="{/DataCatalogSet}"
+										class="noPadding sapUiSmallMarginTop">
+										<l:content>
+											<my:PanelExtended backgroundDesign="Solid" class="tilePanel clickableExtPanel" press="onPanelExtPress">
+												<my:content>
+													<VBox>
+														<items>
+															<core:Icon src="sap-icon://inspect" class="extHoverableIcon"/>
+															<ObjectHeader title="{Description}" condensed="true" class="noPadding"/>
+															<HBox class="sapUiSmallMarginBottom switchMediaDirection">
+																<items>
+																	<ObjectStatus inverted="true" text="ECC" state="None" class="sapUiTinyMarginEnd stylizedAccentNone" visible="{= ${isECC}}"/>
+																	<ObjectStatus inverted="true" text="S/4HANA" state="Information" class="stylizedAccentInformation" visible="{= ${isS4}}"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Data View name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CDSViewName}" press="handleCDSLinkPress"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Version:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{CatalogObjectVersion}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="ASAPIO Payload name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CatalogObjectId}"/>
+																</items>
+															</HBox>
+															<HBox justifyContent="SpaceBetween" class="switchMediaDirection">
+																<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${isActive} === true ? 'Active' : 'Inactive'}"
+																	state="{= ${isActive} === true ? 'Success' : 'Error'}">
+																	<layoutData>
+																		<FlexItemData alignSelf="End"/>
+																	</layoutData>
+																</ObjectStatus>
+															</HBox>
+														</items>
+													</VBox>
+												</my:content>
+											</my:PanelExtended>
+										</l:content>
+									</l:Grid>-->
+								</ScrollContainer>
+								<ScrollContainer id="interface" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<fb:FilterBar id="filterbar_interface" useToolbar="true" showGoOnFB="false" search=".onInterfaceSearch"
+										filterChange=".onInterfaceFilterChange" class="sapUiMediumMarginBottom sapUiSizeCompact customFilterBar">
+										<fb:filterGroupItems>
+											<fb:FilterGroupItem name="search" label="Search" groupName="Group2" visibleInFilterBar="true">
+												<fb:control>
+													<SearchField id="searchFieldInterface" width="250px" search="onSearchMain" placeholder=""></SearchField>
+												</fb:control>
+											</fb:FilterGroupItem>
+											<fb:FilterGroupItem name="connectionID" label="Connection ID" groupName="Group2" visibleInFilterBar="true">
+												<fb:control>
+													<Select id="interfaceConnectionId" items="{/ConnectionSet}" forceSelection="false" change="onConnectionIdInterfaceChange"
+														class="sapUiSmallMarginEnd" width="100%">
+														<core:Item key="{ConnectionId}" text="{ConnectionId} ({ConnectorType})"/>
+													</Select>
+												</fb:control>
+											</fb:FilterGroupItem>
+											<fb:FilterGroupItem name="displayMode" label="Display mode" groupName="Group2" visibleInFilterBar="true">
+												<fb:control>
+													<Select id="interfaceDisplayMode" forceSelection="true" change="onInterfaceDisplayModeChanged" class="sapUiSmallMarginEnd" width="100%"
+														selectedKey="table">
+														<core:Item key="table" text="Table"/>
+														<core:Item key="grid" text="Grid"/>
+													</Select>
+												</fb:control>
+											</fb:FilterGroupItem>
+										</fb:filterGroupItems>
+									</fb:FilterBar>
+									<HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom">
+										<items>
+											<Breadcrumbs id="interfaceBC" currentLocationText="Interfaces" separatorStyle="GreaterThan"></Breadcrumbs>
+											<HBox>
+												<items>
+													<Button text="Create Interface" type="Emphasized" press="onCreateInterface" class="sapUiTinyNegativeMarginTop sapUiTinyMarginEnd"/>
+													<Button text="Transport Interface Configuration" type="Emphasized" press="onTransportInterface" class="sapUiTinyNegativeMarginTop"/>
+												</items>
+											</HBox>
+										</items>
+									</HBox>
+									<Table id="interfaceContentTable" growing="true" growingThreshold="100" mode="SingleSelectLeft"
+										items="{path: '/InterfacesSet', sorter: { path: 'InterfaceId', descending: false, group: '.grouper' }, groupHeaderFactory: '.getGroupHeader' }">
+										<columns>
+											<Column width="20%"><Text text="Interface"/></Column>
+											<Column><Text text="Connection"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Load Type"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Extraction View"/></Column>
+											<Column width="20%" demandPopin="true" minScreenWidth="Desktop"><Text text="Payload"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Payload Version"/></Column>
+											<!--<Column width="8%"><Text text="Status"/></Column>-->
+										</columns>
+										<items>
+											<ColumnListItem type="Navigation" press="onInterfacePanelExtPress">
+												<Text text="{InterfaceId}"/>
+												<Text text="{ConnectionId}"/>
+												<Text text="{path: 'LoadType', formatter: '.formatter.loadTypeText'}"/>
+												<Text text="{ExtractionView}"/>
+												<Text text="{Payload}"/>
+												<Text text="{PayloadVersion}"/>
+												<!--<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${ActivationState} === 'X' ? 'Active' : 'Inactive'}"
+													state="{= ${ActivationState} === 'X' ? 'Success' : 'Error'}"/>-->
+											</ColumnListItem>
+										</items>
+									</Table>
+									<gridf:GridList id="interfaceContent" visible="false" class="mainGridList" growing="true" growingThreshold="100"
+										items="{path: '/InterfacesSet', sorter: { path: 'InterfaceId', descending: false, group: '.grouper' }, groupHeaderFactory: '.getGroupHeader' }">
+										<gridf:customLayout>
+											<grid:GridBoxLayout boxesPerRowConfig="XL4 L4 M3 S1"/>
+										</gridf:customLayout>
+										<gridf:GridListItem>
+											<my:PanelExtended headerText="{InterfaceId}" backgroundDesign="Solid" class="clickableExtPanel" press="onInterfacePanelExtPress">
+												<my:content>
+													<VBox>
+														<items>
+															<!--<core:Icon src="sap-icon://inspect" class="extHoverableIcon"/>
+															<ObjectHeader title="{InterfaceId}" condensed="true" class="noPadding"/>-->
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Connection:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{ConnectionId}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Load Type:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{path: 'LoadType', formatter: '.formatter.loadTypeText'}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Extraction View:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{ExtractionView}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Payload:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{Payload}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Payload Version:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{PayloadVersion}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<!--<HBox justifyContent="SpaceBetween" class="switchMediaDirection">
+																<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${ActivationState} === 'X' ? 'Active' : 'Inactive'}"
+																	state="{= ${ActivationState} === 'X' ? 'Success' : 'Error'}">
+																	<layoutData>
+																		<FlexItemData alignSelf="End"/>
+																	</layoutData>
+																</ObjectStatus>
+															</HBox>-->
+															<!--<HBox class="sapUiSmallMarginBottom switchMediaDirection">
+																<items>
+																	<ObjectStatus inverted="true" text="ECC" state="None" class="sapUiTinyMarginEnd stylizedAccentNone" visible="{= ${isECC}}"/>
+																	<ObjectStatus inverted="true" text="S/4HANA" state="Information" class="stylizedAccentInformation" visible="{= ${isS4}}"/>
+																</items>
+															</HBox>
+															
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Version:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{CatalogObjectVersion}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Payload name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CatalogObjectId}" press="handlePayloadPress"/>
+																</items>
+															</HBox>
+															<HBox justifyContent="SpaceBetween" class="switchMediaDirection">
+																<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${isActive} === true ? 'Active' : 'Inactive'}"
+																	state="{= ${isActive} === true ? 'Success' : 'Error'}">
+																	<layoutData>
+																		<FlexItemData alignSelf="End"/>
+																	</layoutData>
+																</ObjectStatus>
+															</HBox>-->
+														</items>
+													</VBox>
+												</my:content>
+												<my:layoutData>
+													<FlexItemData growFactor="1" shrinkFactor="0"/>
+												</my:layoutData>
+											</my:PanelExtended>
+										</gridf:GridListItem>
+									</gridf:GridList>
+									<!--<l:Grid id="dataObjContent" containerQuery="true" defaultSpan="XL4 L4 M6 S12" content="{/DataCatalogSet}"
+										class="noPadding sapUiSmallMarginTop">
+										<l:content>
+											<my:PanelExtended backgroundDesign="Solid" class="tilePanel clickableExtPanel" press="onPanelExtPress">
+												<my:content>
+													<VBox>
+														<items>
+															<core:Icon src="sap-icon://inspect" class="extHoverableIcon"/>
+															<ObjectHeader title="{Description}" condensed="true" class="noPadding"/>
+															<HBox class="sapUiSmallMarginBottom switchMediaDirection">
+																<items>
+																	<ObjectStatus inverted="true" text="ECC" state="None" class="sapUiTinyMarginEnd stylizedAccentNone" visible="{= ${isECC}}"/>
+																	<ObjectStatus inverted="true" text="S/4HANA" state="Information" class="stylizedAccentInformation" visible="{= ${isS4}}"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Data View name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CDSViewName}" press="handleCDSLinkPress"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="Version:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Text text="{CatalogObjectVersion}" class="textTopAlign"/>
+																</items>
+															</HBox>
+															<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																<items>
+																	<Label text="ASAPIO Payload name:" design="Bold" class="sapUiTinyMarginEnd"/>
+																	<Link text="{CatalogObjectId}"/>
+																</items>
+															</HBox>
+															<HBox justifyContent="SpaceBetween" class="switchMediaDirection">
+																<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${isActive} === true ? 'Active' : 'Inactive'}"
+																	state="{= ${isActive} === true ? 'Success' : 'Error'}">
+																	<layoutData>
+																		<FlexItemData alignSelf="End"/>
+																	</layoutData>
+																</ObjectStatus>
+															</HBox>
+														</items>
+													</VBox>
+												</my:content>
+											</my:PanelExtended>
+										</l:content>
+									</l:Grid>-->
+								</ScrollContainer>
+								<!--<ScrollContainer id="dataObjDetails" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+								-->
+								<uxap:ObjectPageLayout id="dataObjDetails" class="customObjectPage">
+									<uxap:headerTitle>
+										<uxap:ObjectPageHeader objectTitle="{Description}">
+											<uxap:breadcrumbs>
+												<Breadcrumbs currentLocationText="{Description}" separatorStyle="GreaterThan">
+													<Link id="dataObjLink" press="onBreadcrumbPress" text="Standard Data Objects"/>
+												</Breadcrumbs>
+											</uxap:breadcrumbs>
+										</uxap:ObjectPageHeader>
+									</uxap:headerTitle>
+									<uxap:headerContent>
+										<VBox>
+											<items>
+												<HBox class="sapUiSmallMarginBottom switchMediaDirection customBadges">
+													<items>
+														<ObjectStatus inverted="true" text="ECC" state="None" class="sapUiTinyMarginEnd stylizedAccentNone" visible="{= ${isECC}}"/>
+														<ObjectStatus inverted="true" text="S/4HANA" state="Information" class="stylizedAccentInformation" visible="{= ${isS4}}"/>
+													</items>
+												</HBox>
+												<ObjectStatus title="Data View name" text="{CDSViewName}" active="true" press="handleCDSLinkPress"/>
+												<ObjectStatus title="Version" text="{CatalogObjectVersion}" active="false"/>
+												<ObjectStatus title="Payload" text="{CatalogObjectId}" active="true" press="handlePayloadPress"/>
+												<HBox justifyContent="SpaceBetween" class="switchMediaDirection customStatus">
+													<!--<Text text="Version {CatalogObjectVersion}"/>-->
+													<ObjectStatus icon="sap-icon://circle-task-2" text="{= ${isActive} === true ? 'Active' : 'Inactive'}"
+														state="{= ${isActive} === true ? 'Success' : 'Error'}">
+														<layoutData>
+															<FlexItemData alignSelf="End"/>
+														</layoutData>
+													</ObjectStatus>
+												</HBox>
+											</items>
+										</VBox>
+									</uxap:headerContent>
+									<uxap:sections>
+										<uxap:ObjectPageSection id="eventsPanel" titleUppercase="false" title="Events" showTitle="true">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<Table id="objToEvents" backgroundDesign="Transparent" class="sapUiSizeCompact">
+															<columns>
+																<Column><Text text="Event Type"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Object ID"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Object Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Event Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Consumption Class Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop" width="6rem"></Column>
+															</columns>
+														</Table>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+										<uxap:ObjectPageSection id="logPanel" titleUppercase="false" title="Instances">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<Table id="objToLog" backgroundDesign="Transparent" fixedLayout="false" class="sapUiSizeCompact pseudoTextConnectionGroup">
+															<columns>
+																<Column><Text text="Object Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Event Type"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Event Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Load Type"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Connection"/></Column>
+																<!--<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Interface"/></Column>-->
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Changed At"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Changed By"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop" hAlign="Center"><Text text="Activation State"/></Column>
+															</columns>
+														</Table>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+										<uxap:ObjectPageSection id="payloadPanel" titleUppercase="false" title="Payload">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<Table id="objToPayload" backgroundDesign="Transparent" fixedLayout="false" class="sapUiSizeCompact pseudoTextTableNameGroup">
+															<columns>
+																<!--<Column demandPopin="true" minScreenWidth="Desktop" width="7%"><Text text="Sequence"/></Column>-->
+																<!--	<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Table Name"/></Column>-->
+																<Column demandPopin="true"><Text text="Field Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Field Description"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="View Field Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Payload Field Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Key Flag"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Skip Flag"/></Column>
+																<Column demandPopin="false" minScreenWidth="Desktop"><Text text="Conversion Class Name"/></Column>
+																<Column demandPopin="false" minScreenWidth="Desktop"><Text text="Conversion Method Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Default Value"/></Column>
+															</columns>
+														</Table>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+										<uxap:ObjectPageSection id="asyncAPIPanel" titleUppercase="false" title="Async API">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<VBox>
+															<items>
+																<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																	<items>
+																		<Label text="Interface ID:" design="Bold" class="sapUiTinyMarginEnd sapUiTinyMarginTop"/>
+																		<Select id="availableInterfaces" items="{helperModel>/interfaces}" change="asyncAPIInterfaceChanged" forceSelection="false" width="100%">
+																			<core:Item key="{helperModel>InterfaceId}" text="{helperModel>InterfaceId}"/>
+																			<layoutData>
+																				<FlexItemData growFactor="1" shrinkFactor="0"/>
+																			</layoutData>
+																		</Select>
+																	</items>
+																</HBox>
+																<TextArea id="asyncAPIstring" rows="6" width="100%"/>
+																<HBox class="sapUiTinyMarginTop">
+																	<Button text="Copy to clipboard" press="onAsyncAPICopy" class="sapUiSmallMarginEnd"/>
+																	<Button text="Download" press="onAsyncAPIDownload"/>
+																</HBox>
+															</items>
+														</VBox>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+									</uxap:sections>
+								</uxap:ObjectPageLayout>
+								<ScrollContainer id="predefEvents" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<Table id="predefEventsTable" items="{/DataEventSet}" class="sapUiSizeCompact" fixedLayout="false" mode="SingleSelectLeft"
+										select="onPredefEventSelect" growing="true" growingThreshold="100">
+										<headerToolbar>
+											<OverflowToolbar>
+												<Title text="Predefined Events"/>
+												<ToolbarSpacer/>
+												<Button id="createPredefEvent" text="Create" press="onEvtCreate"/>
+												<Button id="deletePredefEvent" text="Delete" press="onEvtDelete" enabled="false"/>
+											</OverflowToolbar>
+										</headerToolbar>
+										<columns>
+											<Column width="13rem">
+												<Text text="Catalog Object ID"/>
+											</Column>
+											<Column width="9rem" demandPopin="true" minScreenWidth="Desktop">
+												<Text text="Catalog Object Version"/>
+											</Column>
+											<Column width="8rem" demandPopin="true" minScreenWidth="Desktop">
+												<Text text="Event Type"/>
+											</Column>
+											<Column width="16rem" demandPopin="true" minScreenWidth="Desktop">
+												<Text text="Object Name"/>
+											</Column>
+											<Column width="7rem" demandPopin="true" minScreenWidth="Desktop">
+												<Text text="Event Name"/>
+											</Column>
+											<Column width="8rem" demandPopin="true" minScreenWidth="Desktop">
+												<Text text="Class Name"/>
+											</Column>
+										</columns>
+										<items>
+											<ColumnListItem type="Navigation" press="onPredefEventNav">
+												<Text text="{CatalogObjectId}"/>
+												<Text text="{CatalogObjectVersion}"/>
+												<Text text="{path: 'EventType', formatter: '.formatter.eventTypeText'}"/>
+												<Text text="{ObjectId}"/>
+												<Text text="{EventName}"/>
+												<Text text="{ClassName}"/>
+											</ColumnListItem>
+										</items>
+									</Table>
+								</ScrollContainer>
+								<ScrollContainer id="predefEventDetails" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding sapUiSizeCompact">
+									<Breadcrumbs currentLocationText="{ObjectId} {EventName}" separatorStyle="GreaterThan">
+										<Link id="predefEventsLink" press="onBreadcrumbPress" text="Predefined Events"/>
+									</Breadcrumbs>
+									<f:SimpleForm id="predefEventDisplayForm" editable="false" layout="ColumnLayout" labelSpanXL="12" labelSpanL="12" labelSpanM="12"
+										labelSpanS="12" adjustLabelSpan="false" columnsXL="2" columnsL="2" columnsM="1" singleContainerFullSize="false">
+										<f:toolbar>
+											<Toolbar>
+												<Title text="{ObjectId} {EventName}"/>
+												<ToolbarSpacer/>
+												<Button text="Edit" type="Emphasized" press="onPredefEventEditPress"/>
+											</Toolbar>
+										</f:toolbar>
+										<f:content>
+											<Label text="Catalog Object ID"/>
+											<Text text="{CatalogObjectId}"/>
+											<Label text="Catalog Object Version"/>
+											<Text text="{CatalogObjectVersion}"/>
+											<Label text="Event Type"/>
+											<Text text="{path: 'EventType', formatter: '.formatter.eventTypeText'}"/>
+											<Label text="Object ID"/>
+											<Text text="{ObjectId}"/>
+											<Label text="Event Name"/>
+											<Text text="{EventName}"/>
+											<Label text="Class Name"/>
+											<Text text="{ClassName}"/>
+										</f:content>
+									</f:SimpleForm>
+									<f:SimpleForm id="predefEventEditForm" editable="true" layout="ColumnLayout" labelSpanXL="12" labelSpanL="12" labelSpanM="12"
+										labelSpanS="12" adjustLabelSpan="false" columnsXL="2" columnsL="2" columnsM="1" singleContainerFullSize="false" visible="false">
+										<f:toolbar>
+											<Toolbar>
+												<Title text="{ObjectId} {EventName}"/>
+												<ToolbarSpacer/>
+												<Button text="Save" type="Emphasized" press="onPredefEventSavePress"/>
+												<Button text="Cancel" type="Reject" press="onPredefEventCancelPress"/>
+											</Toolbar>
+										</f:toolbar>
+										<f:content>
+											<Label text="Catalog Object ID"/>
+											<Input value="{CatalogObjectId}"/>
+											<Label text="Catalog Object Version"/>
+											<Input value="{CatalogObjectVersion}"/>
+											<Label text="Event Type"/>
+											<Select selectedKey="{EventType}">
+												<items>
+													<core:Item key="BO" text="Business Object"/>
+													<core:Item key="RA" text="RAP Business Object"/>
+													<core:Item key="CL" text="ABAP Class"/>
+												</items>
+											</Select>
+											<Label text="Object ID"/>
+											<Input value="{ObjectId}"/>
+											<Label text="Event Name"/>
+											<Input value="{EventName}"/>
+											<Label text="Class Name"/>
+											<Input value="{ClassName}"/>
+										</f:content>
+									</f:SimpleForm>
+								</ScrollContainer>
+								<uxap:ObjectPageLayout id="interfaceDetails" class="customObjectPage">
+									<uxap:headerTitle>
+										<uxap:ObjectPageHeader objectTitle="{InterfaceId}">
+											<uxap:breadcrumbs>
+												<Breadcrumbs currentLocationText="{InterfaceId}" separatorStyle="GreaterThan">
+													<Link id="interfaceLink" press="onBreadcrumbPress" text="Interfaces"/>
+												</Breadcrumbs>
+											</uxap:breadcrumbs>
+										</uxap:ObjectPageHeader>
+									</uxap:headerTitle>
+									<uxap:headerContent>
+										<VBox>
+											<items>
+												<ObjectStatus title="Load Type" text="{path: 'LoadType', formatter: '.formatter.loadTypeText'}" active="false"/>
+												<ObjectStatus title="Extraction View" text="{ExtractionView}" active="false"/>
+												<ObjectStatus title="Payload" text="{Payload}" active="false"/>
+												<ObjectStatus title="Payload Version" text="{PayloadVersion}" active="false"/>
+												<ObjectStatus title="Item Lines" text="{ItemLines}" active="false"/>
+												<ObjectStatus title="Message Type" text="{MessageType}" active="false"/>
+												<ObjectStatus title="Extraction Function Module" text="{ExtractFuncModule}" active="false"/>
+												<ObjectStatus title="Format Function Module" text="{FormatFuncModule}" active="false"/>
+												<ObjectStatus title="Response Function Module" text="{ResponseFuncModule}" active="false"/>
+											</items>
+										</VBox>
+									</uxap:headerContent>
+									<uxap:sections>
+										<uxap:ObjectPageSection id="interfaceLogPanel" titleUppercase="false" title="Instances" showTitle="true">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<Table id="interfaceToLog" backgroundDesign="Transparent" fixedLayout="false" class="sapUiSizeCompact pseudoTextConnectionGroup">
+															<columns>
+																<Column><Text text="Object Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Event Type"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Event Name"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Load Type"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Connection"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Changed At"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Changed By"/></Column>
+																<Column demandPopin="true" minScreenWidth="Desktop" hAlign="Center"><Text text="Activation State"/></Column>
+															</columns>
+														</Table>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+										<uxap:ObjectPageSection id="interfaceAsyncAPIPanel" titleUppercase="false" title="Async API">
+											<uxap:subSections>
+												<uxap:ObjectPageSubSection titleUppercase="false">
+													<uxap:blocks>
+														<VBox>
+															<items>
+																<HBox class="sapUiTinyMarginBottom switchMediaDirection">
+																	<items>
+																		<Label text="Interface ID:" design="Bold" class="sapUiTinyMarginEnd sapUiTinyMarginTop"/>
+																		<Select id="availableIntInterfaces" items="{helperModel>/interfaces}" change="asyncAPIInterfaceChanged" forceSelection="false" width="100%">
+																			<core:Item key="{helperModel>InterfaceId}" text="{helperModel>InterfaceId}"/>
+																			<layoutData>
+																				<FlexItemData growFactor="1" shrinkFactor="0"/>
+																			</layoutData>
+																		</Select>
+																	</items>
+																</HBox>
+																<TextArea id="interfaceAsyncAPIstring" rows="6" width="100%"/>
+																<HBox class="sapUiTinyMarginTop">
+																	<Button text="Copy to clipboard" press="onAsyncAPICopy" class="sapUiSmallMarginEnd"/>
+																	<Button text="Download" press="onAsyncAPIDownload"/>
+																</HBox>
+															</items>
+														</VBox>
+													</uxap:blocks>
+												</uxap:ObjectPageSubSection>
+											</uxap:subSections>
+										</uxap:ObjectPageSection>
+									</uxap:sections>
+								</uxap:ObjectPageLayout>
+								<ScrollContainer id="deploy" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<Breadcrumbs currentLocationText="Deployment settings" separatorStyle="GreaterThan">
+										<Link id="dataObjLinkAllDeploy" press="onBreadcrumbPress" text="Standard Data Objects"/>
+										<Link id="dataObjLinkMainDeploy" press="onBreadcrumbPress"/>
+									</Breadcrumbs>
+									<VBox class="sapUiSizeCompact">
+										<f:SimpleForm maxContainerCols="2" editable="true" layout="ResponsiveGridLayout" labelSpanL="2" labelSpanM="2" emptySpanL="0" emptySpanM="0"
+											columnsL="1" columnsM="1" adjustLabelSpan="false" class="editableForm sapUiMediumMarginBottom">
+											<f:layoutData>
+												<l:GridData span="L7 M9 S12"/>
+											</f:layoutData>
+											<f:toolbar>
+												<Toolbar>
+													<Title text="Deployment settings"/>
+													<ToolbarSpacer/>
+													<Button id="deployBtn" type="Emphasized" text="Deploy" press="onDeploymentPress" enabled="true"/>
+													<Button id="undeployBtn" type="Reject" text="Undeploy" press="onUndeployPress" enabled="true" visible="{= ${deployment>/entryExists}}"/>
+												</Toolbar>
+											</f:toolbar>
+											<f:content>
+												<Label text="Interface Name"/>
+												<Input id="deploymentInterfaceId" value="{deployment>/InterfaceId}" enabled="{= !${deployment>/entryExists}}" change="uppercaseField"
+													width="100%">
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Input>
+												<Label text="Object Name"/>
+												<Input id="deploymentObjectId" value="{deployment>/ObjectName}" maxLength="30" width="100%" visible="false">
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Input>
+												<Label text="Connection"/>
+												<Select id="deploymentConnectionId" selectedKey="{deployment>/ConnectionId}" enabled="{= !${deployment>/entryExists}}"
+													items="{/ConnectionSet}" forceSelection="false" change="onConnectionIdDeplChange" class="sapUiSmallMarginEnd" width="100%">
+													<core:Item key="{ConnectionId}" text="{ConnectionId} ({ConnectorType})"/>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Select>
+												<Label text="Header Fields"/>
+												<Table id="deploymentHeaderFields" items="{deployment>/DataLogToHeaderFields}" mode="MultiSelect"
+													selectionChange="onDeploymentHeadFieldsSelect" class="sapUiSmallMarginBottom" fixedLayout="false">
+													<headerToolbar>
+														<OverflowToolbar>
+															<content>
+																<ToolbarSpacer/>
+																<Button text="Create" press="deploymentHeadFieldAdd"/>
+																<Button id="deleteHeadFields" text="Delete" enabled="false" press="deploymentHeadFieldDelete"/>
+															</content>
+														</OverflowToolbar>
+													</headerToolbar>
+													<columns>
+														<Column><Text text="Name"/></Column>
+														<Column><Text text="Value"/></Column>
+														<Column><Text text="Mandatory"/></Column>
+													</columns>
+													<items>
+														<ColumnListItem>
+															<cells>
+																<Input value="{deployment>Name}" enabled="{= !${deployment>isRead}}" change="validateField"/>
+																<Input value="{deployment>Value}" change="validateField"/>
+																<CheckBox selected="{deployment>Mandatory}" enabled="false"/>
+															</cells>
+														</ColumnListItem>
+													</items>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Table>
+												<Label text="Load Type"/>
+												<Select id="deploymentLoadType" selectedKey="{deployment>/LoadType}" class="sapUiSmallMarginEnd" forceSelection="false" width="100%"
+													change="validateField">
+													<items>
+														<core:Item key="F" text="Full Load"/>
+														<core:Item key="I" text="Incremental Load"/>
+														<core:Item key="P" text="Packed Load"/>
+													</items>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Select>
+												<Label text="Activation"/>
+												<CheckBox selected="{deployment>/IsActive}"/>
+											</f:content>
+										</f:SimpleForm>
+									</VBox>
+								</ScrollContainer>
+								<ScrollContainer id="createInterface" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<Breadcrumbs currentLocationText="Create Interface" separatorStyle="GreaterThan">
+										<Link id="createInterfaceInterfaces" press="onBreadcrumbPress" text="Interfaces"/>
+									</Breadcrumbs>
+									<VBox class="sapUiSizeCompact">
+										<f:SimpleForm maxContainerCols="2" editable="true" layout="ResponsiveGridLayout" labelSpanL="2" labelSpanM="2" emptySpanL="0" emptySpanM="0"
+											columnsL="1" columnsM="1" adjustLabelSpan="false" class="editableForm sapUiMediumMarginBottom">
+											<f:layoutData>
+												<l:GridData span="L7 M9 S12"/>
+											</f:layoutData>
+											<f:toolbar>
+												<Toolbar>
+													<Title text="Interface settings"/>
+													<ToolbarSpacer/>
+													<Button id="createInterfaceBtn" type="Emphasized" text="Create" press="onInterfaceCreatePress" enabled="true"/>
+												</Toolbar>
+											</f:toolbar>
+											<f:content>
+												<Label text="Interface Name"/>
+												<Input id="createInterfaceId" value="{createInterface>/InterfaceId}" change="uppercaseField" width="100%">
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Input>
+												<Label text="Connection"/>
+												<Select id="createInterfaceConnectionId" selectedKey="{createInterface>/ConnectionId}" items="{/ConnectionSet}" forceSelection="false"
+													change="onConnectionIdCreateIntChange" class="sapUiSmallMarginEnd" width="100%">
+													<core:Item key="{ConnectionId}" text="{ConnectionId} ({ConnectorType})"/>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Select>
+												<Label text="Header Fields"/>
+												<Table id="createInterfaceHeaderFields" items="{createInterface>/InterfacesToHeaderFields}" mode="MultiSelect"
+													selectionChange="onCreateIntHeadFieldsSelect" class="sapUiSmallMarginBottom" fixedLayout="false">
+													<headerToolbar>
+														<OverflowToolbar>
+															<content>
+																<ToolbarSpacer/>
+																<Button text="Create" press="createIntHeadFieldAdd"/>
+																<Button id="deleteHeadFieldsInterface" text="Delete" enabled="false" press="createIntHeadFieldDelete"/>
+															</content>
+														</OverflowToolbar>
+													</headerToolbar>
+													<columns>
+														<Column><Text text="Name"/></Column>
+														<Column><Text text="Value"/></Column>
+														<Column><Text text="Mandatory"/></Column>
+													</columns>
+													<items>
+														<ColumnListItem>
+															<cells>
+																<Input value="{createInterface>Name}" enabled="{= ${createInterface>isRead} || ${createInterface>isPredefined} ? false : true }"
+																	change="validateField"/>
+																<Input value="{createInterface>Value}" change="validateField"/>
+																<CheckBox selected="{createInterface>Mandatory}" enabled="false"/>
+															</cells>
+														</ColumnListItem>
+													</items>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Table>
+												<Label text="Load Type"/>
+												<Select id="createInterfaceLoadType" selectedKey="{createInterface>/LoadType}" change="onCreateInterfaceLoadTypeChanged"
+													class="sapUiSmallMarginEnd" width="100%">
+													<items>
+														<!--<core:Item key="F" text="Full Load"/>-->
+														<core:Item key="I" text="Incremental Load"/>
+														<core:Item key="P" text="Packed Load"/>
+													</items>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Select>
+												<Label text="Source Type"/>
+												<Select selectedKey="{createInterface>/ExtractionType}" class="sapUiSmallMarginEnd" forceSelection="false" width="100%">
+													<items>
+														<core:Item key="A" text="ASAPIO Payload Design"/>
+														<core:Item key="D" text="CDS View"/>
+														<core:Item key="C" text="Classic View"/>
+													</items>
+													<layoutData>
+														<l:GridData span="L7 M9 S12"/>
+													</layoutData>
+												</Select>
+												<!--	<Label text="Activation"/>
+												<CheckBox selected="{createInterface>/IsActive}"/>-->
+											</f:content>
+										</f:SimpleForm>
+									</VBox>
+								</ScrollContainer>
+								<ScrollContainer id="connect" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<Table items="{/ConnectionSet}" growing="true" growingThreshold="100">
+										<headerToolbar>
+											<OverflowToolbar>
+												<content>
+													<Title id="connectionTableHeader" text="Connections"/>
+													<ToolbarSpacer/>
+													<Button type="Emphasized" text="Edit" press="onConnectionsEdit"/>
+												</content>
+											</OverflowToolbar>
+										</headerToolbar>
+										<columns>
+											<Column><Text text="Connection ID"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Cloud Type"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="RFC Destination (Upload)"/></Column>
+											<Column demandPopin="true" minScreenWidth="Desktop"><Text text="Codepage"/></Column>
+										</columns>
+										<items>
+											<ColumnListItem>
+												<cells>
+													<Text text="{ConnectionId}"/>
+													<Text text="{ConnectorType}"/>
+													<Text text="{RFCDest}"/>
+													<Text text=""/>
+												</cells>
+											</ColumnListItem>
+										</items>
+									</Table>
+								</ScrollContainer>
+								<ScrollContainer id="monitor" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding force100height">
+									<l:Splitter orientation="Vertical" height="100%">
+										<VBox>
+											<fb:FilterBar id="filterbar_monitor" useToolbar="true" showGoOnFB="true" class="sapUiMediumMarginBottom sapUiSizeCompact customFilterBar"
+												search="onMonitorDateChanged">
+												<fb:filterGroupItems>
+													<fb:FilterGroupItem name="monitorTimestampFromPicker" label="Timestamp From" groupName="Group3" visibleInFilterBar="true">
+														<fb:control>
+															<DateTimePicker id="monitorTimestampFromPicker" width="250px" dateValue="{helperModel>/monitorFromDate}" displayFormat="dd.MM.yyyy HH:mm"
+																change="onMonitorDateChanged"/>
+														</fb:control>
+													</fb:FilterGroupItem>
+													<fb:FilterGroupItem name="monitorTimestampToPicker" label="Timestamp To" groupName="Group3" visibleInFilterBar="true">
+														<fb:control>
+															<DateTimePicker id="monitorTimestampToPicker" width="250px" dateValue="{helperModel>/monitorToDate}" displayFormat="dd.MM.yyyy HH:mm"
+																change="onMonitorDateChanged"/>
+														</fb:control>
+													</fb:FilterGroupItem>
+												</fb:filterGroupItems>
+											</fb:FilterBar>
+											<Breadcrumbs id="monitorBC" currentLocationText="Monitoring" separatorStyle="GreaterThan"></Breadcrumbs>
+											<Table id="monitoringTable" items="{path: 'helperModel>/monitoringData', sorter: { path: 'Timestamp', descending: true}}" growing="true"
+												growingThreshold="100" noDataText="Please select timestamps and press Go button">
+												<columns>
+													<Column width="3%" demandPopin="true" minScreenWidth="Desktop"><Text text="O/I"/></Column>
+													<Column width="12%" demandPopin="true" minScreenWidth="Desktop"><Text text="Cloud Instance Name"/></Column>
+													<Column width="17%" demandPopin="true" minScreenWidth="Desktop"><Text text="Replication Object"/></Column>
+													<Column width="7%" demandPopin="true" minScreenWidth="Desktop"><Text text="Timestamp"/></Column>
+													<Column width="6%" demandPopin="true" minScreenWidth="Desktop"><Text text="Cloud Response Code"/></Column>
+													<Column width="16%" demandPopin="true" minScreenWidth="Desktop"><Text text="Cloud Response"/></Column>
+													<Column width="8%" demandPopin="true" minScreenWidth="Desktop"><Text text="Variant"/></Column>
+													<Column width="6%" demandPopin="true" minScreenWidth="Desktop"><Text text="User"/></Column>
+													<Column width="6%" demandPopin="true" minScreenWidth="Desktop"><Text text="Bytes"/></Column>
+													<Column width="7%" demandPopin="true" minScreenWidth="Desktop"><Text text="Data preparation time"/></Column>
+													<Column width="6%" demandPopin="true" minScreenWidth="Desktop"><Text text="Cloud call time"/></Column>
+													<Column width="6%" demandPopin="true" minScreenWidth="Desktop"><Text text="Data processing time"/></Column>
+												</columns>
+												<items>
+													<ColumnListItem type="Active" press="onMonitoringLineSelected">
+														<core:Icon src="{= ${helperModel>IO} === 'O' ? 'sap-icon://journey-depart' : 'sap-icon://journey-arrive'}"/>
+														<Text text="{helperModel>Instance}"/>
+														<Text text="{helperModel>Object}"/>
+														<Text text="{path: 'helperModel>TimestampDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'dd.MM.yyyy HH:mm:ss'}}"/>
+														<Text text="{helperModel>Acode}"/>
+														<Text text="{helperModel>Areason}"/>
+														<Text text="{helperModel>Slset}"/>
+														<Text text="{helperModel>Uname}"/>
+														<Text text="{helperModel>Bytes}"/>
+														<Text text="{helperModel>DataPrepTime}"/>
+														<Text text="{helperModel>CloudCallTime}"/>
+														<Text text="{helperModel>DataProcTime}"/>
+													</ColumnListItem>
+												</items>
+											</Table>
+											<layoutData>
+												<l:SplitterLayoutData id="monitoringTopSplit" size="100%"/>
+											</layoutData>
+										</VBox>
+										<VBox>
+											<HBox justifyContent="SpaceBetween">
+												<Breadcrumbs currentLocationText="Traces" separatorStyle="GreaterThan" class="sapUiTinyMarginTop"></Breadcrumbs>
+												<Button icon="sap-icon://decline" press="onTracesClose" class="sapUiTinyMarginTop" type="Transparent"/>
+											</HBox>
+											<!--<RadioButtonGroup columns="2" selectedIndex="1" class="sapUiTinyMarginTopBottom">
+												<RadioButton text="Text"/>
+												<RadioButton text="XML"/>
+											</RadioButtonGroup>-->
+											<HBox width="100%">
+												<VBox>
+													<HBox>
+														<Label text="Request" class="sapUiTinyMarginTop sapUiTinyMarginEnd"/>
+														<Button icon="sap-icon://download" press="onTracesRQSave"/>
+													</HBox>
+													<TextArea id="traceRQ" width="95%" rows="10"></TextArea>
+													<layoutData>
+														<FlexItemData growFactor="1"/>
+													</layoutData>
+												</VBox>
+												<VBox>
+													<HBox>
+														<Label text="Response" class="sapUiTinyMarginTop sapUiTinyMarginEnd"/>
+														<Button icon="sap-icon://download" press="onTracesRSSave"/>
+													</HBox>
+													<TextArea id="traceRS" width="95%" rows="10"></TextArea>
+													<layoutData>
+														<FlexItemData growFactor="1"/>
+													</layoutData>
+												</VBox>
+											</HBox>
+											<layoutData>
+												<l:SplitterLayoutData size="auto"/>
+											</layoutData>
+										</VBox>
+									</l:Splitter>
+								</ScrollContainer>
+								<ScrollContainer id="help" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding">
+									<VBox>
+										<items>
+											<Link text="ASAPIO Integration Add-on Documentation" href="https://asapio.com/docs/" target="_blank"/>
+											<Link text="ASAPIO Support" href="https://asapio.com/docs/support/" target="_blank"/>
+										</items>
+									</VBox>
+								</ScrollContainer>
+							</pages>
+						</NavContainer>
+					</tnt:mainContents>
+				</tnt:ToolPage>
+			</pages>
+		</App>
+	</Shell>
+</mvc:View>
