@@ -9,7 +9,7 @@
 |**Service Type**<br>SAP System (ABAP On Premise)|
 |**Service URL**<br>http://asapioerd.asapio.lokal:8000/sap/opu/odata/asadev/gw_config_api_srv|
 |**Module Name**<br>datastudio|
-|**Application Title**<br>Data Studio|
+|**Application Title**<br>Event Studio|
 |**Namespace**<br>fiori_data_studio|
 |**UI5 Theme**<br>sap_horizon|
 |**UI5 Version**<br>1.133.0|

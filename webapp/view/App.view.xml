@@ -13,7 +13,7 @@
 								</layoutData>
 							</Button>
 							<Avatar src="./image/logo.png" displayShape="Square" displaySize="XS" class="logoImg sapUiSmallMarginBegin" visible="{helperModel>/isLogoVisible}"/>
-							<ObjectHeader id="pageHeader" title="Data Studio" class="whiteHeader">
+							<ObjectHeader id="pageHeader" title="Event Studio" class="whiteHeader">
 								<layoutData>
 									<OverflowToolbarLayoutData priority="NeverOverflow"/>
 								</layoutData>

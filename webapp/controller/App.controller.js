@@ -294,7 +294,7 @@ sap.ui.define([
 			//this.readInitialSettings(oModel);
 			//this.getView().getModel().setUseBatch(false);
 
-			this.getView().byId("pageHeader").setTitle("Data Studio" + " (" + oModelObj.text + ")");
+			this.getView().byId("pageHeader").setTitle("Event Studio" + " (" + oModelObj.text + ")");
 
 			var fn = function (evt) {
 				if (evt.getParameter("url").includes("/DataCatalogSet/$count")) {
